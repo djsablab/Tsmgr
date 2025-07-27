@@ -1,33 +1,45 @@
 import React, { useEffect } from 'react';
 import { View, Text, FlatList, Alert, TouchableOpacity, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { setTasks, deleteTask } from '../store/tasksSlice'; // Redux actions
-import { fetchTasks } from '../services/firebaseConfig';  // Firebase veri çekme fonksiyonu
+import { setTasks, deleteTask as deleteTaskFromStore } from '../store/tasksSlice'; // Redux actions
+import { fetchTasks, deleteTask } from '../services/firebaseConfig';  // Firebase functions
+import { auth } from '../services/firebaseConfig';  // Firebase auth import
+import { useFocusEffect } from '@react-navigation/native';  // Import useFocusEffect
 
 const HomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
   const tasks = useSelector((state) => state.tasks.tasks); // Redux store'dan görevler
 
   // Firebase'den görevleri çekme ve Redux'a ekleme
-  useEffect(() => {
-    const loadTasks = async () => {
+  const loadTasks = async () => {
       try {
-        const fetchedTasks = await fetchTasks();
-        dispatch(setTasks(fetchedTasks)); // Redux store'a veri ekle
+        const fetchedTasks = await fetchTasks(auth.currentUser.uid);  // Firebase'ten görevleri çek
+        dispatch(setTasks(fetchedTasks)); // Redux store'a görevleri ekle
       } catch (error) {
         console.error('Görevler alınırken hata:', error);
       }
     };
 
-    loadTasks();  // Sayfa yüklendiğinde görevleri çek
+  useEffect(() => {
+    loadTasks();
   }, [dispatch]);
+
+  // This will make sure the tasks are reloaded when the user navigates back from TaskEdit
+  useFocusEffect(
+    React.useCallback(() => {
+      loadTasks(); // Reload tasks when the screen is focused
+    }, [])
+  );
 
   // Görev silme işlemi
   const handleDeleteTask = async (taskId) => {
     try {
-      await deleteTask(taskId);  // Firebase'den sil
-      dispatch(deleteTask(taskId));  // Redux store'dan sil
+      // Firebase'den sil
+      await deleteTask(auth.currentUser.uid, taskId);
+      // Redux store'dan sil
+      dispatch(deleteTaskFromStore(taskId));  
     } catch (error) {
+      console.error("Görev silinirken hata:", error);
       Alert.alert('Hata', 'Görev silinirken bir hata oluştu.');
     }
   };

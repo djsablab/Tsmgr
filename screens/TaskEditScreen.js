@@ -35,9 +35,9 @@ const TaskEditScreen = ({ route, navigation }) => {
       const auth = getAuth();
       const db = getFirestore();
       const taskDocRef = doc(db, 'users', auth.currentUser.uid, 'tasks', taskId);
-
       // Firestore'da görevi güncelleme
       await updateDoc(taskDocRef, task);
+      
       Alert.alert('Başarılı', 'Görev başarıyla güncellendi.');
       navigation.goBack(); // Düzenleme işleminden sonra HomeScreen'e dön
     } catch (error) {

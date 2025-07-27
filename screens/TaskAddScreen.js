@@ -11,36 +11,32 @@ const AddTaskScreen = ({ navigation }) => {
   const dispatch = useDispatch();
 
   // Görev ekleme fonksiyonu
-  const handleAddTask = async () => {
-    if (!title || !description) {
-      Alert.alert('Hata', 'Başlık ve açıklama zorunludur!');
+const handleAddTask = async () => {
+  if (!title || !description) {
+    Alert.alert('Hata', 'Başlık ve açıklama zorunludur!');
+    return;
+  }
+
+  try {
+    const userId = auth.currentUser?.uid;
+    if (!userId) {
+      Alert.alert('Hata', 'Kullanıcı oturumu açık değil.');
       return;
     }
 
-    try {
-      const userId = auth.currentUser?.uid;  // Firebase Auth'dan geçerli kullanıcı ID'sini alıyoruz
-      if (!userId) {
-        Alert.alert('Hata', 'Kullanıcı oturumu açık değil.');
-        return;
-      }
+    const newTask = { title, description, userId };
+    const docRef = await addTaskToFirebase(userId, newTask); // Pass userId correctly
 
-      const newTask = { title, description, userId };  // Görevi userId ile birlikte ekliyoruz
-      const docRef = await addTaskToFirebase(newTask);  // Firebase'e görev ekleme
+    dispatch(addTask({ id: docRef.id, ...newTask }));
 
-      // Eğer addTask başarılıysa, Redux store'a ekliyoruz
-      dispatch(addTask({ id: docRef.id, ...newTask }));  // Burada 'addTaskRedux' yerine 'addTask' kullanalım
-
-      // Başarıyla görev eklendikten sonra formu sıfırlayalım
-      setTitle('');
-      setDescription('');
-
-      // Görev ekledikten sonra geri dön
-      navigation.goBack(); 
-    } catch (error) {
-      console.error('Görev eklerken hata:', error);
-      Alert.alert('Hata', 'Görev eklerken bir hata oluştu. Lütfen tekrar deneyin.');
-    }
-  };
+    setTitle('');
+    setDescription('');
+    navigation.goBack();
+  } catch (error) {
+    console.error('Görev eklerken hata:', error);
+    Alert.alert('Hata', 'Görev eklerken bir hata oluştu. Lütfen tekrar deneyin.');
+  }
+};
 
   return (
     <>
