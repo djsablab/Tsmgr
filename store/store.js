@@ -1,6 +1,5 @@
-// store.js
 import { configureStore } from '@reduxjs/toolkit';
-import tasksSlice from './tasksSlice'; // Örnek taskSlice
+import tasksSlice from './tasksSlice'; // Import the tasks slice
 
 const store = configureStore({
   reducer: {

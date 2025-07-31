@@ -1,33 +1,31 @@
-// store/tasksSlice.js
-
-import { createSlice } from '@reduxjs/toolkit';
-import moment from 'moment';
+import { createSlice } from "@reduxjs/toolkit";
+import moment from "moment";
 
 const initialState = {
-  tasks: [],  // Görevlerin tutulduğu array
+  tasks: [], // Array to hold tasks
 };
 
 const tasksSlice = createSlice({
-  name: 'tasks',
+  name: "tasks",
   initialState,
   reducers: {
-setTasks: (state, action) => {
-  state.tasks = action.payload.map(task => ({
-    ...task,
-    dateOnly: moment(task.date).format('YYYY-MM-DD'),      // Add YYYY-MM-DD version
-    timestamp: moment(task.date).valueOf(),                // Milliseconds since epoch
-  }));
-},
+    setTasks: (state, action) => {
+      state.tasks = action.payload.map((task) => ({
+        ...task,
+        dateOnly: moment(task.date).format("YYYY-MM-DD"), // Add YYYY-MM-DD version
+        timestamp: moment(task.date).valueOf(), // Milliseconds since epoch
+      }));
+    },
     addTask: (state, action) => {
-        const task = action.payload;
-  state.tasks.push({
-    ...task,
-    dateOnly: moment(task.date).format('YYYY-MM-DD'),
-    timestamp: moment(task.date).valueOf(),
-  });  // Yeni bir görev ekliyoruz
+      const task = action.payload;
+      state.tasks.push({
+        ...task,
+        dateOnly: moment(task.date).format("YYYY-MM-DD"),
+        timestamp: moment(task.date).valueOf(),
+      }); // Adding the new task with formatted date
     },
     deleteTask: (state, action) => {
-      state.tasks = state.tasks.filter(task => task.id !== action.payload);  // Silinen görev hariç, tüm görevleri tutuyoruz
+      state.tasks = state.tasks.filter((task) => task.id !== action.payload); // Remove task by id
     },
   },
 });

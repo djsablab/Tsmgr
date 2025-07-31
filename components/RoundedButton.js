@@ -1,6 +1,4 @@
-// components/Button.js
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet } from "react-native";
 
 const RoundedButton = ({ title, onPress, style }) => {
   // Merge the passed style with the default button style
@@ -15,15 +13,15 @@ const RoundedButton = ({ title, onPress, style }) => {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: "#4CAF50",
     borderRadius: 50,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: "#fff",
+    fontSize: 14,
   },
 });
 

@@ -1,31 +1,36 @@
-import React, { useEffect,useState } from 'react';
-import { View, Text, FlatList, Alert, TouchableOpacity } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { setTasks, deleteTask as deleteTaskFromStore } from '../store/tasksSlice'; // Redux actions
-import { fetchTasks, deleteTask } from '../services/firebaseConfig';  // Firebase functions
-import { auth } from '../services/firebaseConfig';  // Firebase auth import
-import { useFocusEffect } from '@react-navigation/native';  // Import useFocusEffect
-import RoundedButton from '../components/Button';
-import { Calendar } from 'react-native-calendars';
-import moment from 'moment';
+import React, { useEffect, useState } from "react";
+import { View, Text, FlatList, Alert, TouchableOpacity } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setTasks,
+  deleteTask as deleteTaskFromStore,
+} from "../store/tasksSlice";
+import { fetchTasks, deleteTask } from "../services/firebaseConfig";
+import { auth } from "../services/firebaseConfig";
+import { useFocusEffect } from "@react-navigation/native";
+import { Calendar } from "react-native-calendars";
+import moment from "moment";
+import CustomHeader from "../components/CustomHeader";
 
 const HomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
-  const tasks = useSelector((state) => state.tasks.tasks); // Redux store'dan görevler
-  const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
-  // Firebase'den görevleri çekme ve Redux'a ekleme
-const loadTasks = async () => {
-  try {
-    const fetchedTasks = await fetchTasks(auth.currentUser.uid);
-    // Sort tasks by date (ascending)
-    const sortedTasks = fetchedTasks.sort((a, b) =>
-      moment(a.date).valueOf() - moment(b.date).valueOf()
-    );
-    dispatch(setTasks(sortedTasks));
-  } catch (error) {
-    console.error('Görevler alınırken hata:', error);
-  }
-};
+  const tasks = useSelector((state) => state.tasks.tasks); // Redux store tasks
+  const [selectedDate, setSelectedDate] = useState(
+    moment().format("YYYY-MM-DD")
+  );
+  // Function to load tasks from Firebase and set them in Redux store
+  const loadTasks = async () => {
+    try {
+      const fetchedTasks = await fetchTasks(auth.currentUser.uid);
+      // Sort tasks by date (ascending)
+      const sortedTasks = fetchedTasks.sort(
+        (a, b) => moment(a.date).valueOf() - moment(b.date).valueOf()
+      );
+      dispatch(setTasks(sortedTasks));
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    }
+  };
 
   useEffect(() => {
     loadTasks();
@@ -38,95 +43,111 @@ const loadTasks = async () => {
     }, [])
   );
 
-  // Görev silme işlemi
+  // Delete task handler
   const handleDeleteTask = async (taskId) => {
     try {
-      // Firebase'den sil
+      // Delete from Firebase
       await deleteTask(auth.currentUser.uid, taskId);
-      // Redux store'dan sil
-      dispatch(deleteTaskFromStore(taskId));  
+      // Delete from Redux store
+      dispatch(deleteTaskFromStore(taskId));
     } catch (error) {
-      console.error("Görev silinirken hata:", error);
-      Alert.alert('Hata', 'Görev silinirken bir hata oluştu.');
+      console.error("Error deleting task:", error);
+      Alert.alert("Error", "Failed to delete task. Please try again.");
     }
   };
-const filteredTasks = tasks
-  .filter((task) => moment(task.date).format('YYYY-MM-DD') === selectedDate)
-  .sort((a, b) => moment(a.date).valueOf() - moment(b.date).valueOf());
+  // Filter tasks by selected date
+  const filteredTasks = tasks
+    .filter((task) => moment(task.date).format("YYYY-MM-DD") === selectedDate)
+    .sort((a, b) => moment(a.date).valueOf() - moment(b.date).valueOf());
 
-
+  // Handle date selection in the calendar
   const onDayPress = (day) => {
     setSelectedDate(day.dateString);
   };
 
-const getMarkedDates = () => {
-  const marked = {};
-  tasks.forEach((task) => {
-    const date = moment(task.date).format('YYYY-MM-DD');
-    marked[date] = {
-      marked: true,
-      dotColor: 'blue'
+  // Get marked dates for the calendar
+  const getMarkedDates = () => {
+    const marked = {};
+    tasks.forEach((task) => {
+      const date = moment(task.date).format("YYYY-MM-DD");
+      marked[date] = {
+        marked: true,
+        dotColor: "#70d7c7",
+      };
+    });
+    marked[selectedDate] = {
+      ...(marked[selectedDate] || {}),
+      selected: true,
+      selectedColor: "#70d7c7",
     };
-  });
-  marked[selectedDate] = {
-    ...(marked[selectedDate] || {}),
-    selected: true,
-    selectedColor: '#70d7c7'
+    return marked;
   };
-  return marked;
-};
 
-
-  // FlatList render öğesi
+  // FlatList render item function
   const renderItem = ({ item }) => (
     <TouchableOpacity
       activeOpacity={0.8}
-      style={{ margin: 10, padding: 15, backgroundColor: '#f9f9f9', borderRadius: 8 }}
-      onPress={() => navigation.navigate('TaskEdit', { taskId: item.id })}
+      style={{
+        margin: 10,
+        padding: 15,
+        backgroundColor: "#f9f9f9",
+        borderRadius: 8,
+      }}
+      onPress={() => navigation.navigate("TaskDetail", { taskId: item.id })}
     >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text style={{ fontWeight: 'bold', fontSize: 18 }}>{item.title}</Text>
-        <Text>{moment(item.date).format('YYYY-MM-DD')} {moment(item.time).format('hh:mm:ss')}</Text>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Text style={{ fontWeight: "bold", fontSize: 18 }}>{item.title}</Text>
+        <Text>{moment(item.date).format("YYYY-MM-DD HH:mm")}</Text>
       </View>
-      
+
       <Text>{item.description}</Text>
 
-      {/* Görev Silme Butonu */}
       <TouchableOpacity
         onPress={() => handleDeleteTask(item.id)}
-        style={{ marginTop: 10, backgroundColor: '#ff5555', padding: 10, borderRadius: 5 }}
+        style={{
+          marginTop: 10,
+          backgroundColor: "#ff5555",
+          padding: 10,
+          borderRadius: 5,
+        }}
       >
-        <Text style={{ color: '#fff', textAlign: 'center' }}>Sil</Text>
+        <Text style={{ color: "#fff", textAlign: "center" }}>Sil</Text>
       </TouchableOpacity>
     </TouchableOpacity>
   );
 
-  // Ekleme Butonuna Tıklama
+  // Add task navigation handler
   const handleAddTask = () => {
-    navigation.navigate('AddTask'); // AddTask ekranına git
+    navigation.navigate("AddTask"); // Goto AddTask screen
   };
 
   return (
-    <View style={{ flex: 1, padding: 12 }}>
-      <Text style={{ fontSize: 22, fontWeight: 'bold', marginBottom: 20 }}>Görevler:</Text>
-      {tasks.length === 0 ? (
-        <Text>Henüz görev yok.</Text>
-      ) : (
-        <View>
-      <Calendar
-        onDayPress={onDayPress}
-        markedDates={getMarkedDates()}
-        markingType="period"
-        minDate={new Date().toISOString().split("T")[0]}
+    <View style={{ flex: 1 }}>
+      <CustomHeader
+        title={`Hello, ${auth.currentUser?.displayName || "Kullanıcı"}`}
+        onAddPress={handleAddTask}
+        onUserPress={() => navigation.navigate("UserProfile")}
       />
-  <FlatList
-  data={filteredTasks}
-  keyExtractor={(item) => item.id}
-  renderItem={renderItem}
-/>
-</View>
-      )}
-      <RoundedButton onPress={handleAddTask} style={{ position: 'absolute', top: 10, right: 10 }} title="+" />
+
+      <View style={{ flex: 1, padding: 12 }}>
+        {tasks.length === 0 ? (
+          <Text>Henüz görev yok.</Text>
+        ) : (
+          <View>
+            <Calendar
+              onDayPress={onDayPress}
+              markedDates={getMarkedDates()}
+              markingType="period"
+              minDate={new Date().toISOString().split("T")[0]}
+            />
+            <FlatList
+              data={filteredTasks}
+              keyExtractor={(item) => item.id}
+              renderItem={renderItem}
+            />
+          </View>
+        )}
+      </View>
     </View>
   );
 };
