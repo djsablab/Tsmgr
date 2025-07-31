@@ -1,6 +1,7 @@
 // store/tasksSlice.js
 
 import { createSlice } from '@reduxjs/toolkit';
+import moment from 'moment';
 
 const initialState = {
   tasks: [],  // Görevlerin tutulduğu array
@@ -10,11 +11,20 @@ const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
   reducers: {
-    setTasks: (state, action) => {
-      state.tasks = action.payload;  // Payload'daki görevleri Redux store'a set ediyoruz
-    },
+setTasks: (state, action) => {
+  state.tasks = action.payload.map(task => ({
+    ...task,
+    dateOnly: moment(task.date).format('YYYY-MM-DD'),      // Add YYYY-MM-DD version
+    timestamp: moment(task.date).valueOf(),                // Milliseconds since epoch
+  }));
+},
     addTask: (state, action) => {
-      state.tasks.push(action.payload);  // Yeni bir görev ekliyoruz
+        const task = action.payload;
+  state.tasks.push({
+    ...task,
+    dateOnly: moment(task.date).format('YYYY-MM-DD'),
+    timestamp: moment(task.date).valueOf(),
+  });  // Yeni bir görev ekliyoruz
     },
     deleteTask: (state, action) => {
       state.tasks = state.tasks.filter(task => task.id !== action.payload);  // Silinen görev hariç, tüm görevleri tutuyoruz

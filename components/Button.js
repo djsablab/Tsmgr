@@ -2,9 +2,12 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 
-const Button = ({ title, onPress }) => {
+const RoundedButton = ({ title, onPress, style }) => {
+  // Merge the passed style with the default button style
+  const buttonStyle = style ? [styles.button, style] : styles.button;
+
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
+    <TouchableOpacity style={buttonStyle} onPress={onPress} activeOpacity={0.8}>
       <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
   );
@@ -13,10 +16,10 @@ const Button = ({ title, onPress }) => {
 const styles = StyleSheet.create({
   button: {
     backgroundColor: '#4CAF50',
-    padding: 15,
-    borderRadius: 8,
+    borderRadius: 50,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     alignItems: 'center',
-    marginBottom: 20,
   },
   buttonText: {
     color: '#fff',
@@ -24,4 +27,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Button;
+export default RoundedButton;
