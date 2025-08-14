@@ -8,7 +8,16 @@ import {
   StatusBar,
 } from "react-native";
 
-const CustomHeader = ({ title, onAddPress, onUserPress }) => {
+import { Ionicons } from "@expo/vector-icons";
+
+const CustomHeader = ({
+  title,
+  onAddPress,
+  onUserPress,
+  onSavePress,
+  onDTPress,
+  onTaskUpdate,
+}) => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
@@ -16,12 +25,25 @@ const CustomHeader = ({ title, onAddPress, onUserPress }) => {
         <View style={styles.buttonGroup}>
           {onUserPress && (
             <TouchableOpacity onPress={onUserPress} style={styles.userButton}>
-              <Text style={styles.userText}>👤</Text>
+              <Ionicons name="person" size={24} color="#313131ff" />
             </TouchableOpacity>
           )}
+
           {onAddPress && (
             <TouchableOpacity onPress={onAddPress} style={styles.addButton}>
-              <Text style={styles.addText}>+</Text>
+              <Ionicons name="add" size={26} color="#313131ff" />
+            </TouchableOpacity>
+          )}
+
+          {onSavePress && (
+            <TouchableOpacity onPress={onSavePress} style={styles.addButton}>
+              <Ionicons name="save" size={22} color="#313131ff" />
+            </TouchableOpacity>
+          )}
+
+          {onDTPress && (
+            <TouchableOpacity onPress={onDTPress} style={styles.addButton}>
+              <Ionicons name="calendar" size={22} color="#313131ff" />
             </TouchableOpacity>
           )}
         </View>
@@ -69,7 +91,7 @@ const styles = StyleSheet.create({
   userButton: {
     backgroundColor: "#fff",
     borderRadius: 20,
-    padding: 0,
+    padding: 4,
     width: 35,
     height: 35,
     alignItems: "center",

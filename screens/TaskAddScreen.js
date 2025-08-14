@@ -1,12 +1,17 @@
 import React, { useState } from "react";
-import { TextInput, Alert, StyleSheet, View, Platform } from "react-native";
+import { TextInput, Alert, StyleSheet, View } from "react-native";
 import { useDispatch } from "react-redux";
 import { addTask } from "../store/tasksSlice";
-import { addTask as addTaskToFirebase } from "../services/firebaseConfig";
-import { auth } from "../services/firebaseConfig";
+import { addTask as addTaskToFirebase, auth } from "../services/firebaseConfig";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import CustomHeader from "../components/CustomHeader";
-import RoundedButton from "../components/RoundedButton";
+import {
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
+} from "react-native";
+import { Platform } from "react-native";
 
 const AddTaskScreen = ({ navigation }) => {
   const [title, setTitle] = useState("");
@@ -17,15 +22,13 @@ const AddTaskScreen = ({ navigation }) => {
 
   const dispatch = useDispatch();
 
-  // Show date or time picker
   const showPicker = (currentMode) => {
     setMode(currentMode);
     setShowDatePicker(true);
   };
 
-  // Handle date or time change
   const handleAddTask = async () => {
-    if (!title || !description) {
+    if (!title.trim() || !description.trim()) {
       Alert.alert("Error", "Title and description are required.");
       return;
     }
@@ -36,8 +39,12 @@ const AddTaskScreen = ({ navigation }) => {
         return;
       }
 
-      const formattedDate = date.toISOString();
-      const newTask = { title, description, date: formattedDate, userId };
+      const newTask = {
+        title: title.trim(),
+        description: description.trim(),
+        date: date.toISOString(),
+        userId,
+      };
       const docRef = await addTaskToFirebase(userId, newTask);
       dispatch(addTask({ id: docRef.id, ...newTask }));
 
@@ -50,7 +57,6 @@ const AddTaskScreen = ({ navigation }) => {
     }
   };
 
-  // Handle date/time picker change
   const onChange = (event, selectedValue) => {
     if (event?.type === "dismissed") {
       setShowDatePicker(false);
@@ -60,71 +66,58 @@ const AddTaskScreen = ({ navigation }) => {
     setShowDatePicker(false);
 
     if (mode === "date") {
-      const currentDate = selectedValue || date;
-      setDate(currentDate);
+      setDate(selectedValue || date);
       showPicker("time");
     } else if (mode === "time") {
-      const selectedTime = selectedValue || date;
       const updatedDate = new Date(date);
-      updatedDate.setHours(selectedTime.getHours());
-      updatedDate.setMinutes(selectedTime.getMinutes());
+      updatedDate.setHours(selectedValue.getHours());
+      updatedDate.setMinutes(selectedValue.getMinutes());
       setDate(updatedDate);
     }
   };
 
-  // Render the add task form
   return (
-    <View style={{ flex: 1 }}>
-      <View style={{ marginBottom: 5 }}>
-        <CustomHeader title="Add Task" />
-      </View>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+      <CustomHeader
+        title="Add Task"
+        onSavePress={handleAddTask}
+        onDTPress={() => showPicker("date")}
+      />
 
-      <View style={{ padding: 10, flex: 1 }}>
+      <View style={styles.container}>
         <TextInput
-          id="title"
           style={[styles.input, { minHeight: 50, flexShrink: 1 }]}
-          placeholder="Enter Task Title"
+          placeholder="Task Title"
           value={title}
           onChangeText={setTitle}
-          textAlignVertical="top"
-        />
-        <TextInput
-          id="description"
-          style={[styles.input, { flexGrow: 1, minHeight: 150, flexShrink: 1 }]}
-          placeholder="Enter Task Description"
-          value={description}
-          onChangeText={setDescription}
-          textAlignVertical="top"
-          multiline={true}
         />
 
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-evenly",
-            alignItems: "center",
-            marginBottom: 50,
-            gap: 4,
-            flexWrap: "wrap",
-          }}
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
-          <RoundedButton
-            title="Pick Date & Time"
-            onPress={() => showPicker("date")}
-            style={{ backgroundColor: "#70d7c7" }}
-          ></RoundedButton>
-          <RoundedButton
-            title="Add to Tasks"
-            onPress={handleAddTask}
-            style={{ backgroundColor: "#3fb5a8" }}
-          />
-        </View>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+              <TextInput
+                style={[
+                  styles.input,
+                  styles.textArea,
+                  { flexGrow: 1, minHeight: 150, flexShrink: 1 },
+                ]}
+                placeholder="Task Description"
+                value={description}
+                onChangeText={setDescription}
+                multiline
+              />
+            </ScrollView>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
 
         {showDatePicker && (
           <DateTimePicker
             value={date}
             mode={mode}
-            is24Hour={true}
+            is24Hour
             display="default"
             onChange={onChange}
           />
@@ -135,14 +128,26 @@ const AddTaskScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    paddingBottom: 40, // To avoid keyboard overlap
+  },
   input: {
-    borderColor: "#ccc",
-    borderWidth: 1,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  input_desc: {
     marginBottom: 10,
     paddingLeft: 10,
     borderRadius: 5,
-    minHeight: 50, // Keeps the input area reasonable for small inputs
-    paddingVertical: 10, // Add vertical padding for better spacing
+  },
+
+  textArea: {
+    textAlignVertical: "top",
   },
 });
 

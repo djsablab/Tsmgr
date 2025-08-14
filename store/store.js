@@ -5,6 +5,7 @@ const store = configureStore({
   reducer: {
     tasks: tasksSlice,
   },
+  // No need to manually add thunk, as it's already included by default
 });
 
 export default store;

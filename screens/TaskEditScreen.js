@@ -4,8 +4,8 @@ import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import moment from "moment";
-import CustomHeader from "../components/CustomHeader"; // Assuming you have the same custom header
-import RoundedButton from "../components/RoundedButton"; // Assuming you have the same custom button
+import CustomHeader from "../components/CustomHeader"; 
+import RoundedButton from "../components/RoundedButton";
 
 const TaskEditScreen = ({ route, navigation }) => {
   const { taskId } = route.params;
@@ -108,7 +108,7 @@ const TaskEditScreen = ({ route, navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       <View style={{ marginBottom: 5 }}>
-        <CustomHeader title="Edit Task" />
+        <CustomHeader title="Edit Task" onSavePress={handleUpdateTask} onDTPress={showPicker} />
       </View>
 
       <View style={{ padding: 10, flex: 1 }}>
@@ -140,16 +140,6 @@ const TaskEditScreen = ({ route, navigation }) => {
             flexWrap: "wrap",
           }}
         >
-          <RoundedButton
-            title={`Pick Date & Time`}
-            onPress={() => showPicker("date")}
-            style={{ backgroundColor: "#70d7c7" }}
-          />
-          <RoundedButton
-            title="Update Task"
-            onPress={handleUpdateTask}
-            style={{ backgroundColor: "#3fb5a8" }}
-          />
         </View>
 
         {showDatePicker && (
@@ -168,13 +158,11 @@ const TaskEditScreen = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   input: {
-    borderColor: "#ccc",
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 10,
-    borderRadius: 5,
-    minHeight: 50, // Keeps the input area reasonable for small inputs
-    paddingVertical: 10, // Add vertical padding for better spacing
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 12,
   },
 });
 

@@ -1,10 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import moment from "moment";
+import { doc, updateDoc } from "firebase/firestore";
+import { firestore } from "../services/firebaseConfig"; // Use your Firestore instance
 
+// Initial state
 const initialState = {
-  tasks: [], // Array to hold tasks
+  tasks: [],
 };
 
+// Create the slice
 const tasksSlice = createSlice({
   name: "tasks",
   initialState,
@@ -12,8 +16,8 @@ const tasksSlice = createSlice({
     setTasks: (state, action) => {
       state.tasks = action.payload.map((task) => ({
         ...task,
-        dateOnly: moment(task.date).format("YYYY-MM-DD"), // Add YYYY-MM-DD version
-        timestamp: moment(task.date).valueOf(), // Milliseconds since epoch
+        dateOnly: moment(task.date).format("YYYY-MM-DD"),
+        timestamp: moment(task.date).valueOf(),
       }));
     },
     addTask: (state, action) => {
@@ -22,14 +26,37 @@ const tasksSlice = createSlice({
         ...task,
         dateOnly: moment(task.date).format("YYYY-MM-DD"),
         timestamp: moment(task.date).valueOf(),
-      }); // Adding the new task with formatted date
+      });
     },
     deleteTask: (state, action) => {
-      state.tasks = state.tasks.filter((task) => task.id !== action.payload); // Remove task by id
+      state.tasks = state.tasks.filter((task) => task.id !== action.payload);
+    },
+    updateTask: (state, action) => {
+      const { taskId, updatedFields } = action.payload;
+      const index = state.tasks.findIndex((task) => task.id === taskId);
+      if (index !== -1) {
+        state.tasks[index] = {
+          ...state.tasks[index],
+          ...updatedFields,
+        };
+      }
     },
   },
 });
 
-export const { setTasks, addTask, deleteTask } = tasksSlice.actions;
+// Async thunk to update a task in Firestore
+export const updateTaskInFirebase = (userId, updatedTask) => async (dispatch) => {
+  try {
+    const taskDoc = doc(firestore, "users", userId, "tasks", updatedTask.id);
+    await updateDoc(taskDoc, updatedTask);
+
+    dispatch(tasksSlice.actions.updateTask({ taskId: updatedTask.id, updatedFields: updatedTask }));
+  } catch (error) {
+    console.error("Error updating task:", error);
+  }
+};
+
+// Export the action creators
+export const { setTasks, addTask, deleteTask, updateTask } = tasksSlice.actions;
 
 export default tasksSlice.reducer;

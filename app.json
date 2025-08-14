@@ -3,7 +3,7 @@
     "name": "tsmgr",
     "slug": "tsmgr",
     "version": "1.0.0",
-    "orientation": "both",
+    "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
