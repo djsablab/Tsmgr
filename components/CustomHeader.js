@@ -17,11 +17,15 @@ const CustomHeader = ({
   onSavePress,
   onDTPress,
   onTaskUpdate,
+  onLogoutPress,
 }) => {
+
+  const truncatedText = title.length > 16 ? title.slice(0, 16) + '...' : title;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.title}>{truncatedText}</Text>
         <View style={styles.buttonGroup}>
           {onUserPress && (
             <TouchableOpacity onPress={onUserPress} style={styles.userButton}>
@@ -44,6 +48,11 @@ const CustomHeader = ({
           {onDTPress && (
             <TouchableOpacity onPress={onDTPress} style={styles.addButton}>
               <Ionicons name="calendar" size={22} color="#313131ff" />
+            </TouchableOpacity>
+          )}
+          {onLogoutPress && (
+            <TouchableOpacity onPress={onLogoutPress} style={styles.addButton}>
+              <Ionicons name="log-out" size={22} color="#313131ff" />
             </TouchableOpacity>
           )}
         </View>
@@ -69,6 +78,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "#fff",
+    
   },
   buttonGroup: {
     flexDirection: "row",

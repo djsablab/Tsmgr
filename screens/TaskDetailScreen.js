@@ -1,11 +1,11 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { deleteTask as deleteTaskFromStore } from "../store/tasksSlice";
 import { auth, deleteTask } from "../services/firebaseConfig";
 import moment from "moment";
 import { Ionicons } from "@expo/vector-icons";
 import CustomHeader from "../components/CustomHeader";
-
+import Toast from "react-native-toast-message";
 const TaskDetailScreen = ({ route, navigation }) => {
   const { taskId } = route.params;
   const dispatch = useDispatch();
@@ -18,10 +18,18 @@ const TaskDetailScreen = ({ route, navigation }) => {
     try {
       await deleteTask(auth.currentUser.uid, taskId);
       dispatch(deleteTaskFromStore(taskId));
-      Alert.alert("Deleted", "Task removed successfully.");
+      Toast.show({
+        type: "success",
+        text1: "Task deleted successfully",
+        text2: "Your task has been deleted.",
+      });
       navigation.goBack();
     } catch (error) {
-      Alert.alert("Error", "Failed to delete task.");
+      Toast.show({
+        type: "error",
+        text1: "Error deleting task",
+        text2: "Could not delete the task. Please try again.",
+      });
     }
   };
 
@@ -66,6 +74,7 @@ const TaskDetailScreen = ({ route, navigation }) => {
           <Text style={styles.noDescription}>No description</Text>
         )}
       </View>
+      <Toast />
     </View>
   );
 };

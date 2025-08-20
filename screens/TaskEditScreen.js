@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
-import { View, TextInput, Button, Alert, StyleSheet } from "react-native";
+import { View, TextInput, StyleSheet } from "react-native";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import moment from "moment";
-import CustomHeader from "../components/CustomHeader"; 
-import RoundedButton from "../components/RoundedButton";
-
+import CustomHeader from "../components/CustomHeader";
+import Toast from "react-native-toast-message";
 const TaskEditScreen = ({ route, navigation }) => {
   const { taskId } = route.params;
   const [task, setTask] = useState({
@@ -38,18 +36,24 @@ const TaskEditScreen = ({ route, navigation }) => {
           setTask(data);
           setDateObj(new Date(data.date));
         } else {
-          Alert.alert("Error", "Task not found.");
+          Toast.show({
+            type: "error",
+            text1: "Task not found",
+            text2: "The task you are trying to edit does not exist.",
+          });
         }
       } catch (error) {
-        Alert.alert("Error", "Error occurred while fetching the task.");
+        Toast.show({
+          type: "error",
+          text1: "Error fetching task",
+          text2: "Could not retrieve the task details. Please try again.",
+        });
         console.error(error);
       }
     };
 
     fetchTask();
   }, [taskId]);
-
-  
 
   // Show picker by mode
   const showPicker = (currentMode) => {
@@ -83,7 +87,11 @@ const TaskEditScreen = ({ route, navigation }) => {
   // Handle task update
   const handleUpdateTask = async () => {
     if (!task.title || !task.description) {
-      Alert.alert("Error", "Title and description cannot be empty.");
+      Toast.show({
+        type: "info",
+        text1: "Please fill in all fields",
+        text2: "Title and description cannot be empty.",
+      });
       return;
     }
 
@@ -98,9 +106,17 @@ const TaskEditScreen = ({ route, navigation }) => {
         taskId
       );
       await updateDoc(taskDocRef, task);
-      navigation.goBack();
+      navigation.navigate("Home");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Home" }],
+      });
     } catch (error) {
-      console.error("Update error:", error);
+      Toast.show({
+        type: "error",
+        text1: "Error updating task",
+        text2: "Could not update the task. Please try again.",
+      });
     }
   };
 
@@ -108,10 +124,14 @@ const TaskEditScreen = ({ route, navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       <View style={{ marginBottom: 5 }}>
-        <CustomHeader title="Edit Task" onSavePress={handleUpdateTask} onDTPress={showPicker} />
+        <CustomHeader
+          title="Edit Task"
+          onSavePress={handleUpdateTask}
+          onDTPress={showPicker}
+        />
       </View>
 
-      <View style={{ padding: 10, flex: 1 }}>
+      <View style={{ paddingHorizontal: 16, paddingTop: 16, flex: 1 }}>
         <TextInput
           id="title"
           style={[styles.input, { minHeight: 50, flexShrink: 1 }]}
@@ -139,8 +159,7 @@ const TaskEditScreen = ({ route, navigation }) => {
             gap: 4,
             flexWrap: "wrap",
           }}
-        >
-        </View>
+        ></View>
 
         {showDatePicker && (
           <DateTimePicker
@@ -152,6 +171,7 @@ const TaskEditScreen = ({ route, navigation }) => {
           />
         )}
       </View>
+      <Toast />
     </View>
   );
 };

@@ -13,7 +13,11 @@ import {
   deleteTask as deleteTaskFromStore,
   updateTaskInFirebase,
 } from "../store/tasksSlice";
-import { fetchTasks, deleteTask } from "../services/firebaseConfig";
+import {
+  fetchTasks,
+  deleteTask,
+  getUserInfo,
+} from "../services/firebaseConfig"; // Make sure to implement this service function
 import { auth } from "../services/firebaseConfig";
 import { useFocusEffect } from "@react-navigation/native";
 import { Calendar } from "react-native-calendars";
@@ -21,6 +25,9 @@ import moment from "moment";
 import CustomHeader from "../components/CustomHeader";
 import { Ionicons } from "@expo/vector-icons"; // For edit/pen icon
 import { MaterialIcons } from "@expo/vector-icons"; // For checkbox icons
+import { getFirestore, doc, getDoc } from "firebase/firestore"; // Firestore imports
+
+const db = getFirestore();
 
 const HomeScreen = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -28,6 +35,29 @@ const HomeScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(
     moment().format("YYYY-MM-DD")
   );
+  const [username, setUsername] = useState(""); // State to store username
+
+  // Fetch user data (username)
+  const loadUserData = useCallback(async () => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+
+    try {
+      const userDocRef = doc(db, "users", uid);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        setUsername(userDoc.data().username); // Store username in state
+      } else {
+        console.log("No user document found");
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadUserData();
+  }, [loadUserData]);
 
   const loadTasks = useCallback(async () => {
     try {
@@ -50,6 +80,7 @@ const HomeScreen = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       loadTasks();
+      loadUserData();
     }, [loadTasks])
   );
 
@@ -167,7 +198,7 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       <CustomHeader
-        title={`Hello, ${auth.currentUser?.displayName || "User"}`}
+        title={`Hello, ${username || "User"}`}
         onAddPress={() => navigation.navigate("AddTask")}
         onUserPress={() => navigation.navigate("UserProfile")}
       />
@@ -176,7 +207,15 @@ const HomeScreen = ({ navigation }) => {
         <Calendar
           onDayPress={(day) => setSelectedDate(day.dateString)}
           markedDates={getMarkedDates()}
-          markingType="period"
+          markingType="dot"
+          theme={{
+            todayTextColor: "#70d7c7",
+            selectedDayBackgroundColor: "#70d7c7",
+            arrowColor: "#70d7c7",
+            monthTextColor: "#333",
+            textDayFontSize: 16,
+            textMonthFontSize: 20,
+          }}
         />
 
         {tasks.length === 0 ? (

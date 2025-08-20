@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TextInput, Alert, StyleSheet, View } from "react-native";
+import { TextInput, StyleSheet, View } from "react-native";
 import { useDispatch } from "react-redux";
 import { addTask } from "../store/tasksSlice";
 import { addTask as addTaskToFirebase, auth } from "../services/firebaseConfig";
@@ -12,6 +12,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Platform } from "react-native";
+import Toast from "react-native-toast-message";
 
 const AddTaskScreen = ({ navigation }) => {
   const [title, setTitle] = useState("");
@@ -29,13 +30,21 @@ const AddTaskScreen = ({ navigation }) => {
 
   const handleAddTask = async () => {
     if (!title.trim() || !description.trim()) {
-      Alert.alert("Error", "Title and description are required.");
+      Toast.show({
+        type: "error",
+        text1: "Please fill in all fields",
+        text2: "Title and description cannot be empty.",
+      });
       return;
     }
     try {
       const userId = auth.currentUser?.uid;
       if (!userId) {
-        Alert.alert("Error", "Invalid session. Please log in again.");
+        Toast.show({
+          type: "error",
+          text1: "User not authenticated",
+          text2: "Please log in to add tasks.",
+        });
         return;
       }
 
@@ -53,7 +62,11 @@ const AddTaskScreen = ({ navigation }) => {
       navigation.goBack();
     } catch (error) {
       console.error("Error adding task:", error);
-      Alert.alert("Error", "Error adding task. Please try again later.");
+      Toast.show({
+        type: "error",
+        text1: "Error adding task",
+        text2: error.message,
+      });
     }
   };
 
@@ -123,6 +136,7 @@ const AddTaskScreen = ({ navigation }) => {
           />
         )}
       </View>
+      <Toast />
     </View>
   );
 };

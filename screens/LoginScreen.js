@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, Alert, Image } from "react-native";
+import { View, Text, TextInput, Image } from "react-native";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../services/firebaseConfig";
 import RoundedButton from "../components/RoundedButton";
-import { withDecay } from "react-native-reanimated";
+import Toast from "react-native-toast-message";
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -11,15 +11,27 @@ const LoginScreen = ({ navigation }) => {
   // Handle user login
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please enter a valid email and password.");
+      Toast.show({
+        type: "info",
+        text1: "Please fill in all fields",
+        text2: "Email and password cannot be empty.",
+      });
       return;
     }
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
       navigation.navigate("Home");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Home" }],
+      });
     } catch (error) {
-      Alert.alert("Error", error.message);
+      Toast.show({
+        type: "error",
+        text1: "Login failed",
+        text2: "Invalid email or password.",
+      });
     }
   };
 
@@ -87,6 +99,7 @@ const LoginScreen = ({ navigation }) => {
           }}
         />
       </View>
+      <Toast />
     </View>
   );
 };
