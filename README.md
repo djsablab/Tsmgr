@@ -32,7 +32,7 @@ Windows:
 
 ### 🚀 Finally, install everything needed accourding to **package.json**
 ```bash
-  git clone "https://github.com/djsablab/Tsmgr"
+  npm i
 ```
 
 # 📚 Wiki for Tsmgr
