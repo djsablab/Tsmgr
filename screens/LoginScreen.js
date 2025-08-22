@@ -1,44 +1,105 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../services/firebaseConfig'; // Doğru şekilde auth import edilmiştir
-
+import React, { useState } from "react";
+import { View, Text, TextInput, Image } from "react-native";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../services/firebaseConfig";
+import RoundedButton from "../components/RoundedButton";
+import Toast from "react-native-toast-message";
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
+  // Handle user login
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Hata', 'Lütfen geçerli bir e-posta ve şifre girin.');
+      Toast.show({
+        type: "info",
+        text1: "Please fill in all fields",
+        text2: "Email and password cannot be empty.",
+      });
       return;
     }
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      Alert.alert('Başarılı', 'Başarıyla giriş yaptınız!');
-      navigation.navigate('Home'); // Başarıyla giriş yaptıktan sonra Home'a yönlendirme
+      navigation.navigate("Home");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Home" }],
+      });
     } catch (error) {
-      Alert.alert('Hata', error.message); // Hata mesajını kullanıcıya gösterme
+      Toast.show({
+        type: "error",
+        text1: "Login failed",
+        text2: "Invalid email or password.",
+      });
     }
   };
 
+  // Render the login form
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 16 }}>
-      <Text>Giriş Yap</Text>
+    <View style={{ flex: 1, justifyContent: "center", padding: 16 }}>
+      <Image
+        source={require("../assets/splash-icon.png")}
+        style={{
+          width: 175,
+          height: 175,
+          alignSelf: "center",
+          marginBottom: 20,
+        }}
+      />
+      <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 20 }}>
+        Login
+      </Text>
+      <Text style={{ marginBottom: 10 }}>Please enter your credentials:</Text>
       <TextInput
-        placeholder="E-posta"
+        placeholder="Enter Email"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
+        style={{
+          marginBottom: 20,
+          borderWidth: 1,
+          padding: 10,
+          borderRadius: 12,
+        }}
       />
       <TextInput
-        placeholder="Şifre"
+        placeholder="Enter Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        style={{
+          marginBottom: 20,
+          borderWidth: 1,
+          padding: 10,
+          borderRadius: 12,
+        }}
       />
-      <Button title="Giriş Yap" onPress={handleLogin} />
-      <Button title="Kayıt Ol" onPress={() => navigation.navigate('Register')} />
+
+      <View
+        style={{
+          marginTop: 20,
+          flexDirection: "row",
+          justifyContent: "space-evenly",
+        }}
+      >
+        <RoundedButton
+          title="Login"
+          onPress={handleLogin}
+          style={{ marginBottom: 20, width: "45%", backgroundColor: "#70d7c7" }}
+        />
+
+        <RoundedButton
+          title="Register"
+          onPress={() => navigation.navigate("Register")}
+          style={{
+            marginBottom: 20,
+            width: "45%",
+            backgroundColor: "#3fb5a8",
+          }}
+        />
+      </View>
+      <Toast />
     </View>
   );
 };
