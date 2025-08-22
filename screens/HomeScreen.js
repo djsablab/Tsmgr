@@ -231,6 +231,7 @@ const HomeScreen = ({ navigation }) => {
             data={filteredTasks}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
+            style={{ marginBottom: 32 }}
           />
         )}
       </View>
