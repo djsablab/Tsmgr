@@ -35,6 +35,11 @@ Windows:
   npm i
 ```
 
+### 🏃 Run the app after the installation
+```bash
+  npx expo start
+```
+
 # 📚 Wiki for Tsmgr
 Are you one of the React Native developer to develop your own dream task management app based on this repository? Check this [wiki](https://github.com/djsablab/Tsmgr/wiki) for more in-depth installation tricks to set the app for development environment correctly.
 
